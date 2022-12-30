@@ -1,0 +1,11 @@
+/* 
+  Localizable.strings
+  EasyExchange
+
+  Created by Albertodev on 23/12/22.
+  
+*/
+
+"choose_item" = "Elige un producto:";
+"item" = "El producto ";
+"price" = "tiene un precio de: ";
