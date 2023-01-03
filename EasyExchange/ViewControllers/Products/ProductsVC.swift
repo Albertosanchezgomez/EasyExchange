@@ -10,12 +10,14 @@ import UIKit
 class ProductsVC: UIViewController, UITableViewDelegate, UITableViewDataSource, ProductDelegate{
     
     @IBOutlet weak var LBLtitle: UILabel!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var tableview: UITableView!
     
     private let productPresenter = ProductPresenter(productService: ProductService(), exchangeService: ExchangeService())
     
     var count = 0
     var products = [ProductModel]()
+    var allProducts = [ProductModel]()
     var exchanges = [ExchangeModel]()
     
     
@@ -45,7 +47,7 @@ class ProductsVC: UIViewController, UITableViewDelegate, UITableViewDataSource, 
     // MARK: Table View
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return exchanges.count
+        return products.count
     }
     
     
@@ -60,35 +62,44 @@ class ProductsVC: UIViewController, UITableViewDelegate, UITableViewDataSource, 
     
     func showItem(item: ProductModel) {
         
-        var  value =  0.0
+        let groupedSku = self.allProducts.filter{ $0.sku ?? "" == item.sku ?? ""}
         
-        if(item.currency == "EUR"){
-            
-            value = item.amount
-            
-        } else {
-            
-            value = ProductsProvider().getValue(exchanges: self.exchanges, product: item)
-        }
+        let product = ProductsProvider().getValue(exchanges: self.exchanges, products: groupedSku)
+        
+        
+        let value =  product.finalValue
+        
         
         let storyBoard : UIStoryboard = UIStoryboard(name: "Main", bundle:nil)
         let vc = storyBoard.instantiateViewController(withIdentifier: "ProductDetailVC") as! ProductDetailVC
         
-        vc.product = item.sku
+        vc.product = product
         vc.price = value
+        vc.productName = item.sku ?? ""
         
         self.navigationController?.pushViewController(vc, animated: true)
-        
     }
+    
     
 }
 
 extension ProductsVC: ExchangeProtocol, ProductProtocol {
     
+    func setStart() {
+        
+        self.activityIndicator.startAnimating()
+    }
+    
+    func setFinish() {
+        
+        self.activityIndicator.stopAnimating()
+    }
+    
+    
     func setProducts(products: [ProductModel]) {
         
-        self.products = products
-        
+        self.products = products.removingDuplicates()
+        self.allProducts = products
         
         DispatchQueue.main.async {
             
@@ -97,7 +108,7 @@ extension ProductsVC: ExchangeProtocol, ProductProtocol {
         }
     }
     
-  
+    
     func setExchanges(exchanges: [ExchangeModel]) {
         
         self.exchanges = exchanges
@@ -113,7 +124,7 @@ extension ProductsVC: ExchangeProtocol, ProductProtocol {
     
     func setEmptyProducts() {
         self.tableview.isHidden = true
-
+        
     }
     
     

@@ -17,8 +17,10 @@ class ExchangeService {
         
         let network =  NetworkBuilder()
         
+        let url = network.buildUrl(endpoint: endpoint)
+
         
-        let task = session.dataTask(with: URL(string: network.buildUrl(endpoint: endpoint))!, completionHandler: { data, response, error in
+        let task = session.dataTask(with: URL(string: url)!, completionHandler: { data, response, error in
             
             if error != nil {
                 return

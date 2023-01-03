@@ -12,76 +12,63 @@ class ProductsProvider: NSObject {
     
     //TO DO: Improve function
     
-    func getValue(exchanges: [ExchangeModel], product: ProductModel) -> Double {
-        
-        
-        // This function can be improved a lot, but im using a public Mac and have to upload the project now, sorry
+    func getValue(exchanges: [ExchangeModel], products: [ProductModel]) -> ProductModel {
         
         var currentValue = ""
         var isValueFound = false
+        var transactions = [TransactionsModel]()
         var euros = 0.0
+        var product = ProductModel()
         
-        currentValue = product.currency
-        euros = product.amount
-        
-        
-        exchanges.forEach{ item in
+        products.forEach { prd in
             
-            if(item.from == currentValue){
-                
-                if(item.to == "EUR"){
-                    
-                    isValueFound = true
-                    euros = euros * item.rate
-                    
-                } else {
-                    
-                    currentValue = item.to
-                    euros = euros * item.rate
-                    
-                }
-            }
-        }
-        
-        if(!isValueFound){
+            currentValue = prd.currency ?? ""
+            euros = prd.amount ?? 0.0
             
-            exchanges.forEach{ item in
+            if( currentValue == "EUR"){
                 
-                if(item.from == currentValue){
+                euros = euros 
+                
+            } else {
+                
+                repeat {
                     
-                    if(item.to == "EUR"){
+                    exchanges.forEach{ item in
                         
-                        isValueFound = true
-                        euros = euros * item.rate
-                        
-                    } else {
-                        
-                        currentValue = item.to
-                        euros = euros * item.rate
-                        
+                        if(item.from == currentValue){
+                            
+                            if(item.to == "EUR"){
+                                
+                                isValueFound = true
+                                
+                                let initialValue = euros
+                                
+                                euros =  euros * item.rate
+                                
+                                let transaction = TransactionsModel(from: item.from, to: item.to, initialValue: initialValue , value: euros)
+                                
+                                transactions.append(transaction)
+
+                            } else {
+                                
+                                currentValue = item.to
+                                let initialValue = euros
+                                euros = euros * item.rate
+                                let transaction = TransactionsModel(from: item.from, to: item.to, initialValue: initialValue, value: euros)
+                                transactions.append(transaction)
+                            }
+                        }
                     }
-                }
-            }
-            
-        }
-        
-        if(!isValueFound){
-            
-            exchanges.forEach{ item in
-                
-                if(item.from == currentValue){
                     
-                    if(item.to == "EUR"){
-                        
-                        isValueFound = true
-                        euros = euros * item.rate
-                        
-                    }
-                }
+                } while !isValueFound
             }
+           
             
         }
         
-        return euros
+        product.finalValue = euros
+        product.transactions = transactions
+        
+        return product
     }
 }

@@ -11,5 +11,7 @@ protocol ProductProtocol: NSObjectProtocol {
     
     func setProducts(products: [ProductModel])
     func setEmptyProducts()
+    func setStart()
+    func setFinish()
     
 }

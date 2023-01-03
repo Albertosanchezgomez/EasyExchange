@@ -33,12 +33,15 @@ class ProductPresenter {
   
     func getProducts() {
         
+        self.productProtocol?.setStart()
+        
         productService.getProducts { [weak self] products in
             if products.count == 0 {
                 self?.productProtocol?.setEmptyProducts()
             } else {
                 
                 self?.productProtocol?.setProducts(products: products)
+                self?.productProtocol?.setFinish()
             }
         }
         
